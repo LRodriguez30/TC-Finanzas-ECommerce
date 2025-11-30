@@ -12,7 +12,7 @@ def registrar(datos: dict, etiqueta_mensaje: ctk.CTkLabel, ventana: ctk.CTk, mar
     exito, mensaje = controlador.registrar(datos)
     etiqueta_mensaje.configure(text=mensaje, text_color="green" if exito else "red")
     if exito:
-        ir_a_login(ventana, marco)  # Redirige al login tras registro exitoso
+        ir_a_pagina_principal(ventana, marco, datos)  # Redirige al login tras registro exitoso
 
 def iniciar_sesion(correo: str, contraseña: str, etiqueta_mensaje: ctk.CTkLabel, ventana: ctk.CTk, marco: ctk.CTkFrame) -> None:
     """
@@ -34,3 +34,4 @@ def limpiar_mensaje(etiqueta_mensaje: ctk.CTkLabel):
     def limpiar(event) -> None:
         etiqueta_mensaje.configure(text="")
     return limpiar
+

@@ -38,7 +38,7 @@ class CompradorDAO:
             conn.close()
 
     @staticmethod
-    def insertar_comprador(comprador: Comprador) -> bool:
+    def insertar_comprador(id_usuario: int) -> bool:
         """
         Inserta un usuario en la base de datos.
         Retorna True si se insertó correctamente, False en caso contrario.
@@ -54,7 +54,7 @@ class CompradorDAO:
                 INSERT INTO Compradores (IdUsuario)
                 VALUES (?)
             """, (
-                comprador.id_usuario
+                id_usuario,
             ))
             conn.commit()
             return True

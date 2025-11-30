@@ -94,25 +94,69 @@ class UsuarioService:
         )
         
         exito = UsuarioDAO.insertar_usuario(usuario)
+        usuario_registrado = UsuarioDAO.obtener_por_correo(usuario.correo)
         
         roles = {
             1: "Administrador",
             2: "Vendedor",
             3: "Comprador"
         }
-        
+        print(roles[usuario.id_rol])
         if exito:
             if usuario.id_rol in roles:
                 if roles[usuario.id_rol] == "Comprador":
-                    exito = CompradorDAO.insertar_comprador(usuario.id)
+                    exito = CompradorDAO.insertar_comprador(usuario_registrado.id)
                 if roles[usuario.id_rol] == "Vendedor":
-                    exito = VendedorDAO.insertar_vendedor(usuario.id)
+                    exito = VendedorDAO.insertar_vendedor(usuario_registrado.id)
                 if roles[usuario.id_rol] == "Administrador":
-                    exito = AdministradorDAO.insertar_administrador(usuario.id)
-                else:
-                    exito = False
+                    exito = AdministradorDAO.insertar_administrador(usuario_registrado.id)
         
         if exito:
             return {'exito': True, 'mensajes': {"general": "Registro exitoso."}}
         else:
             return {'exito': False, 'mensajes': {"general": "Error al registrar usuario."}}
+
+    def cambiar_correo(self, id_usuario: int, nuevo_correo: str):
+        """
+        Valida y actualiza el correo de un usuario existente.
+        """
+        mensajes = {}
+        if not nuevo_correo or not re.match(r"[^@]+@[^@]+\.[^@]+", nuevo_correo):
+            mensajes['general'] = "Correo con formato inválido."
+            return {'exito': False, 'mensajes': mensajes}
+
+        existente = UsuarioDAO.obtener_por_correo(nuevo_correo)
+        if existente and existente.id != id_usuario:
+            mensajes['general'] = "El correo ya está en uso por otro usuario."
+            return {'exito': False, 'mensajes': mensajes}
+
+        actualizado = UsuarioDAO.actualizar_correo(id_usuario, nuevo_correo)
+        if actualizado:
+            return {'exito': True, 'mensajes': {'general': 'Correo actualizado.'}}
+        else:
+            return {'exito': False, 'mensajes': {'general': 'Error al actualizar correo.'}}
+
+    def cambiar_contraseña(self, id_usuario: int, contraseña_actual: str, nueva_contraseña: str):
+        """
+        Verifica la contraseña actual y actualiza con la nueva contraseña hasheada.
+        """
+        mensajes = {}
+        if not nueva_contraseña or len(nueva_contraseña) < 6:
+            mensajes['general'] = "La nueva contraseña debe tener al menos 6 caracteres."
+            return {'exito': False, 'mensajes': mensajes}
+
+        usuario = UsuarioDAO.obtener_por_id(id_usuario)
+        if not usuario:
+            mensajes['general'] = "Usuario no encontrado."
+            return {'exito': False, 'mensajes': mensajes}
+
+        if not verificar_contraseña(contraseña_actual, usuario.contraseña):
+            mensajes['general'] = "Contraseña actual incorrecta."
+            return {'exito': False, 'mensajes': mensajes}
+
+        hashed = encriptar_contraseña(nueva_contraseña)
+        actualizado = UsuarioDAO.actualizar_contraseña(id_usuario, hashed)
+        if actualizado:
+            return {'exito': True, 'mensajes': {'general': 'Contraseña actualizada.'}}
+        else:
+            return {'exito': False, 'mensajes': {'general': 'Error al actualizar contraseña.'}}

@@ -38,3 +38,8 @@ def ir_a_pagina_principal(ventana: CTk, marco: CTkFrame, usuario):
     marco.destroy()
     from frontend.ui.pagina_principal import mostrar_pagina_principal
     mostrar_pagina_principal(ventana, usuario)
+
+def cerrar_sesion(root, frame):
+    frame.destroy()     # Elimina la vista principal
+    from frontend.ui.login import mostrar_login
+    mostrar_login(root) # Vuelve al login
