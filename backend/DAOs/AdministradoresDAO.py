@@ -38,7 +38,7 @@ class AdministradorDAO:
             conn.close()
 
     @staticmethod
-    def insertar_administrador(administrador: Administrador) -> bool:
+    def insertar_administrador(id_usuario: int) -> bool:
         """
         Inserta un administrador en la base de datos.
         Retorna True si se insertó correctamente, False en caso contrario.
@@ -54,7 +54,7 @@ class AdministradorDAO:
                 INSERT INTO Administradores (IdUsuario)
                 VALUES (?)
             """, (
-                administrador.id_usuario
+                id_usuario
             ))
             conn.commit()
             return True
