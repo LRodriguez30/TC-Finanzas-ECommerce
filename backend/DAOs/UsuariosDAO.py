@@ -22,7 +22,7 @@ class UsuarioDAO:
                 Contraseña, FechaRegistro
                 FROM Usuarios
                 WHERE Correo = ?
-            """, (correo))
+            """, (correo,))
             
             row = cursor.fetchone()
             if not row:
