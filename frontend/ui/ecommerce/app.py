@@ -3,6 +3,7 @@ from .sidebar import Sidebar
 from .pages.home import HomePage
 from .pages.products import ProductsPage
 from .pages.financial import FinancialPage
+from .pages.account import AccountPage
 from .pages.sellers import SellersPage
 from .pages.account import AccountPage
 from frontend.components.navigation import cerrar_sesion
@@ -38,8 +39,7 @@ class EcommerceApp(ctk.CTkFrame):
         self.pages["PRODUCTS"] = ProductsPage(self.main_frame)
         self.pages["FINANCIAL"] = FinancialPage(self.main_frame)
         self.pages["SELLERS"] = SellersPage(self.main_frame)
-        # Página de 'Mi Cuenta' que permite cambiar paleta y datos del usuario
-        self.pages["ACCOUNT"] = AccountPage(self.main_frame, usuario=usuario)
+        self.pages["ACCOUNT"] = AccountPage(self.main_frame, app_reference=self)
 
         # Paleta por defecto (puede ser cambiada desde la página 'Mi Cuenta')
         self.current_palette = {'sidebar_bg': '#65A30D', 'accent': '#65A30D', 'hover': '#F97316'}
