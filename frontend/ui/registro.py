@@ -79,9 +79,9 @@ def mostrar_registro(ventana_principal: ctk.CTk) -> None:
 
     # Limpiar mensaje al escribir en cualquier campo
     for campo in [entrada_primer_nombre, entrada_segundo_nombre,
-                  entrada_primer_apellido, entrada_segundo_apellido,
-                  entrada_telefono, entrada_correo, entrada_contraseña,
-                  entrada_confirmar_contraseña]:
+                    entrada_primer_apellido, entrada_segundo_apellido,
+                    entrada_telefono, entrada_correo, entrada_contraseña,
+                    entrada_confirmar_contraseña]:
         campo.bind("<Key>", lambda e: etiqueta_mensaje.configure(text=""))
 
     # Botón para registrar usuario

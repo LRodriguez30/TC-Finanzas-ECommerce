@@ -4,7 +4,9 @@ import os
 class ExcelHandler:
     @staticmethod
     def generate_templates(directory):
-        # Balance Sheet Template
+        # Plantilla de Balance General
+        # Crea una plantilla básica con filas típicas de cuentas (activo, pasivo, patrimonio)
+        # y columnas requeridas para que el usuario complete los montos.
         bs_data = {
             'Cuenta': ['Efectivo', 'Cuentas por Cobrar', 'Inventarios', 'Activos Fijos', 'Cuentas por Pagar', 'Deuda Largo Plazo', 'Capital Social', 'Utilidades Retenidas'],
             'Tipo': ['Activo', 'Activo', 'Activo', 'Activo', 'Pasivo', 'Pasivo', 'Patrimonio', 'Patrimonio'],
@@ -12,7 +14,7 @@ class ExcelHandler:
         }
         bs_df = pd.DataFrame(bs_data)
         
-        # Income Statement Template
+        
         is_data = {
             'Cuenta': ['Ventas Netas', 'Costo de Ventas', 'Gastos Operativos', 'Gastos Financieros', 'Impuestos'],
             'Tipo': ['Ingreso', 'Egreso', 'Egreso', 'Egreso', 'Egreso'],
@@ -20,7 +22,8 @@ class ExcelHandler:
         }
         is_df = pd.DataFrame(is_data)
         
-        # Create a single Excel file with two sheets
+        # Crea un archivo Excel único con dos hojas (Balance General y Estado de Resultados)
+        # para que el usuario descargue y complete los datos financieros.
         output_path = os.path.join(directory, "Plantilla_Financiera.xlsx")
         with pd.ExcelWriter(output_path, engine='xlsxwriter') as writer:
             bs_df.to_excel(writer, sheet_name='Balance General', index=False)
@@ -28,12 +31,14 @@ class ExcelHandler:
 
     @staticmethod
     def load_financial_data(file_path):
-        # Expects sheets "Balance General" and "Estado Resultados" or separate files
-        # For simplicity, let's assume the user uploads one file with 2 sheets
+        # Carga datos financieros desde un archivo Excel
+        # Se espera que el archivo contenga las hojas "Balance General" y "Estado Resultados",
+        # o que el usuario suba un único archivo con ambas hojas. En implementaciones más
+        # avanzadas podría aceptarse la carga por separado o validarse la estructura.
         try:
             bs = pd.read_excel(file_path, sheet_name='Balance General')
             iss = pd.read_excel(file_path, sheet_name='Estado Resultados')
             return bs, iss
         except Exception as e:
-            print(f"Error loading Excel: {e}")
+            print(f"Error al cargar Excel: {e}")
             return None, None

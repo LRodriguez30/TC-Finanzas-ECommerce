@@ -14,14 +14,16 @@ class FinancialPage(ctk.CTkFrame):
         self.analyzer = FinancialAnalyzer()
         self.excel_handler = ExcelHandler()
         
-        # --- Header ---
+        # --- Encabezado ---
+        # Contenedor superior con título y botones de acciones (importar, exportar, plantillas)
         self.header_frame = ctk.CTkFrame(self, fg_color="transparent")
         self.header_frame.pack(fill="x", pady=(0, 20))
         
         title = ctk.CTkLabel(self.header_frame, text="Análisis Financiero", font=ctk.CTkFont(size=22, weight="bold"), text_color="#111827")
         title.pack(side="left")
         
-        # Buttons
+        # Contenedor de botones
+        # Botones para descargar plantillas, importar años y exportar reportes
         btn_frame = ctk.CTkFrame(self.header_frame, fg_color="transparent")
         btn_frame.pack(side="right")
         
@@ -30,7 +32,8 @@ class FinancialPage(ctk.CTkFrame):
         ctk.CTkButton(btn_frame, text="Importar Año Actual", command=lambda: self.import_data('current'), fg_color="#06B6D4").pack(side="left", padx=6)
         ctk.CTkButton(btn_frame, text="Exportar Reporte", command=self.export_report, fg_color="#10B981").pack(side="left", padx=6)
 
-        # --- Tabs ---
+        # --- Pestañas ---
+        # Secciones del análisis financiero: Balance, Estado de Resultados, Fuentes/Usos, Razones y Gráficos
         self.tabview = ctk.CTkTabview(self, segmented_button_selected_color="#F97316", segmented_button_selected_hover_color="#D97706")
         self.tabview.pack(fill="both", expand=True)
         
@@ -43,7 +46,8 @@ class FinancialPage(ctk.CTkFrame):
             "Proforma": self.tabview.add("Proforma")
         }
         
-        # Initial empty state
+        # Estado inicial vacío
+        # Muestra mensajes indicando que el usuario debe importar datos para ver resultados
         self.show_empty_state()
 
     def show_empty_state(self):
@@ -61,9 +65,9 @@ class FinancialPage(ctk.CTkFrame):
         path = filedialog.askopenfilename(filetypes=[("Excel files", "*.xlsx")])
         if not path: return
         
-        # Load data (Simplified: assuming file has both sheets for now, or user uploads same file twice if split)
-        # In a real app, we'd store paths and load when both are ready, or load partially.
-        # Here we will try to load BS and IS from the selected file.
+        # Carga de datos (simplificado): asumimos que el archivo contiene ambas hojas necesarias
+        # En una aplicación real gestionaríamos rutas, validaciones y cargas parciales por separado.
+        # Aquí intentamos leer Balance (BS) y Estado de Resultados (IS) desde el archivo seleccionado.
         bs, iss = self.excel_handler.load_financial_data(path)
         
         if year_type == 'base':
@@ -81,7 +85,7 @@ class FinancialPage(ctk.CTkFrame):
             self.refresh_ui()
 
     def refresh_ui(self):
-        # Clear tabs
+        # Limpia el contenido anterior de cada pestaña antes de renderizar los nuevos resultados
         for tab in self.tabs.values():
             for widget in tab.winfo_children(): widget.destroy()
             
@@ -188,11 +192,12 @@ class FinancialPage(ctk.CTkFrame):
             ctk.CTkLabel(parent, text=f"{row['Cuenta']}: ${row['Monto']:.2f}", text_color="#374151").pack(anchor="w", pady=2)
 
     def render_charts(self, parent):
-        # Example chart: Total Assets Base vs Current
+        # Gráfico de ejemplo: Total de Activos Año Base vs Año Actual
+        # Compara la suma de activos entre ambos años para una vista rápida de cambios
         if self.analyzer.base_bs is None: return
         
         fig, ax = plt.subplots(figsize=(5, 4))
-        # Sum of 'Monto' for Activo
+        # Suma de la columna 'Monto' para las cuentas clasificadas como 'Activo'
         base_assets = self.analyzer.base_bs[self.analyzer.base_bs['Tipo'] == 'Activo']['Monto'].sum()
         curr_assets = self.analyzer.current_bs[self.analyzer.current_bs['Tipo'] == 'Activo']['Monto'].sum()
         ax.bar(['Año Base', 'Año Actual'], [base_assets, curr_assets], color=['#E5E7EB', '#06B6D4'])
@@ -201,6 +206,72 @@ class FinancialPage(ctk.CTkFrame):
         canvas = FigureCanvasTkAgg(fig, master=parent)
         canvas.draw()
         canvas.get_tk_widget().pack(pady=10)
+
+    def _format_value_for_display(self, val, ratio_name=None):
+        # Formatea valores para mostrar: si es None devuelve '-' ; si está entre -1 y 1 y el nombre sugiere ratio -> porcentaje
+        if val is None:
+            return '-'
+        try:
+            v = float(val)
+        except Exception:
+            return str(val)
+
+        # Heurística para mostrar como porcentaje
+        lower_name = (ratio_name or '').lower()
+        if any(k in lower_name for k in ['margin', 'roa', 'roe', 'return', 'ratio', 'turnover', 'rotat']):
+            # mostrar como porcentaje cuando el valor esté en unidad (0.12 -> 12.00%)
+            return f"{v*100:.2f}%" if abs(v) < 20 else f"{v:.2f}"
+
+        # Si es un número grande, separador de miles
+        if abs(v) >= 1000:
+            return f"{v:,.2f}"
+        return f"{v:.2f}"
+
+    def render_ratios(self, parent, df):
+        # Contenedor scrollable para las tarjetas de razones
+        sf = ctk.CTkScrollableFrame(parent)
+        sf.pack(fill="both", expand=True, padx=10, pady=10)
+
+        # Encabezado de columnas (estético)
+        header = ctk.CTkFrame(sf, fg_color="transparent")
+        header.pack(fill="x", pady=(0,8))
+        ctk.CTkLabel(header, text="Razón", font=ctk.CTkFont(weight="bold"), width=200, anchor="w").pack(side="left")
+        ctk.CTkLabel(header, text="Año Base", font=ctk.CTkFont(weight="bold"), width=150).pack(side="left")
+        ctk.CTkLabel(header, text="Año Actual", font=ctk.CTkFont(weight="bold"), width=150).pack(side="left")
+        ctk.CTkLabel(header, text="Cambio %", font=ctk.CTkFont(weight="bold"), width=120).pack(side="left")
+
+        # Cada fila del DataFrame -> tarjeta/row
+        for _, row in df.iterrows():
+            name = row.get('Ratio', '')
+            base = row.get('Año Base')
+            curr = row.get('Año Actual')
+            change = row.get('Cambio %')
+
+            rframe = ctk.CTkFrame(sf, fg_color="#FFFFFF")
+            rframe.pack(fill="x", pady=4, padx=2)
+
+            # Nombre de la razón
+            ctk.CTkLabel(rframe, text=name, width=200, anchor="w", font=ctk.CTkFont(weight="bold"), text_color="#1f2937").pack(side="left", padx=(6,0))
+
+            # Valores base y actual
+            ctk.CTkLabel(rframe, text=self._format_value_for_display(base, name), width=150, anchor="center").pack(side="left")
+            ctk.CTkLabel(rframe, text=self._format_value_for_display(curr, name), width=150, anchor="center").pack(side="left")
+
+            # Cambio % con color
+            if change is None:
+                change_text = '-'
+                color = "#374151"
+            else:
+                try:
+                    ch = float(change)
+                    sign = '+' if ch >= 0 else ''
+                    change_text = f"{sign}{ch:.2f}%"
+                    color = "#16a34a" if ch >= 0 else "#dc2626"
+                except Exception:
+                    change_text = str(change)
+                    color = "#374151"
+
+            ctk.CTkLabel(rframe, text=change_text, width=120, anchor="e", text_color=color).pack(side="left", padx=(0,6))
 
     def export_report(self):
         print("Exporting report...")
