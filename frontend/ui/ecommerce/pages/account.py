@@ -1,5 +1,6 @@
->>>>>>> a147cb1 (implementacion de chatbot para interpretaciones y mejora en general)
+import customtkinter as ctk
 from ..theme_manager import available_palettes, set_palette, get_color
+
 
 class AccountPage(ctk.CTkFrame):
     def __init__(self, master, app_reference=None):
