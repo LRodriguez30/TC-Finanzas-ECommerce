@@ -1,3 +1,5 @@
+import datetime
+
 class Usuario:
     def __init__(
         self,
@@ -12,13 +14,13 @@ class Usuario:
         contraseña=None,
         fecha_registro=None
     ):
-        self.id_usuario = id
-        self.id_rol = id_rol
-        self.primer_nombre = primer_nombre
-        self.segundo_nombre = segundo_nombre
-        self.primer_apellido = primer_apellido
-        self.segundo_apellido = segundo_apellido
-        self.telefono = telefono
-        self.correo = correo
-        self.contraseña = contraseña
-        self.fecha_registro = fecha_registro
+        self.id: int = id
+        self.id_rol: int = id_rol
+        self.primer_nombre: str = primer_nombre
+        self.segundo_nombre: str = segundo_nombre
+        self.primer_apellido: str = primer_apellido
+        self.segundo_apellido: str= segundo_apellido
+        self.telefono: str= telefono
+        self.correo: str = correo
+        self.contraseña: str = contraseña
+        self.fecha_registro: datetime = fecha_registro
