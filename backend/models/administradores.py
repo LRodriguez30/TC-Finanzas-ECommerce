@@ -4,5 +4,5 @@ class Administrador:
         id=None,
         id_usuario=None
     ):
-        self.id_administrador = id
-        self.id_usuario = id_usuario
+        self.id: int = id
+        self.id_usuario: int = id_usuario

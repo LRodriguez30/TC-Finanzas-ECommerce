@@ -1,5 +1,8 @@
 from backend.models.usuarios import Usuario
 from backend.DAOs.UsuariosDAO import UsuarioDAO
+from backend.DAOs.CompradoresDAO import CompradorDAO
+from backend.DAOs.VendedoresDAO import VendedorDAO
+from backend.DAOs.AdministradoresDAO import AdministradorDAO
 
 from utils.helpers import encriptar_contraseña, verificar_contraseña
 import re
@@ -89,8 +92,26 @@ class UsuarioService:
             correo=datos["correo"],
             contraseña=encriptar_contraseña(datos["contraseña"])
         )
-
+        
         exito = UsuarioDAO.insertar_usuario(usuario)
+        
+        roles = {
+            1: "Administrador",
+            2: "Vendedor",
+            3: "Comprador"
+        }
+        
+        if exito:
+            if usuario.id_rol in roles:
+                if roles[usuario.id_rol] == "Comprador":
+                    exito = CompradorDAO.insertar_comprador(usuario.id)
+                if roles[usuario.id_rol] == "Vendedor":
+                    exito = VendedorDAO.insertar_vendedor(usuario.id)
+                if roles[usuario.id_rol] == "Administrador":
+                    exito = AdministradorDAO.insertar_administrador(usuario.id)
+                else:
+                    exito = False
+        
         if exito:
             return {'exito': True, 'mensajes': {"general": "Registro exitoso."}}
         else:

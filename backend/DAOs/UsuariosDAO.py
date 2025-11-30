@@ -18,11 +18,11 @@ class UsuarioDAO:
             cursor = conn.cursor()
             cursor.execute("""
                 SELECT IdUsuario, IdRol, PrimerNombre, SegundoNombre,
-                       PrimerApellido, SegundoApellido, Telefono, Correo,
-                       Contraseña, FechaRegistro
+                PrimerApellido, SegundoApellido, Telefono, Correo,
+                Contraseña, FechaRegistro
                 FROM Usuarios
                 WHERE Correo = ?
-            """, (correo,))
+            """, (correo))
             
             row = cursor.fetchone()
             if not row:
@@ -30,16 +30,16 @@ class UsuarioDAO:
 
             # Mapear los campos de la fila a un objeto Usuario usando índices
             return Usuario(
-                id=row[0],            # IdUsuario
-                id_rol=row[1],        # IdRol
-                primer_nombre=row[2],
-                segundo_nombre=row[3],
-                primer_apellido=row[4],
-                segundo_apellido=row[5],
-                telefono=row[6],
-                correo=row[7],
-                contraseña=row[8],    # <-- hash de bcrypt
-                fecha_registro=row[9]
+                id=row[0],                # IdUsuario
+                id_rol=row[1],            # IdRol
+                primer_nombre=row[2],     # PrimerNombre
+                segundo_nombre=row[3],    # SegundoNombre
+                primer_apellido=row[4],   # PrimerApellido
+                segundo_apellido=row[5],  # SegundoApellido
+                telefono=row[6],          # Telefono
+                correo=row[7],            # Correo
+                contraseña=row[8],        # <-- hash de bcrypt
+                fecha_registro=row[9]     # FechaRegistro
             )
         except Exception as e:
             print("Error al obtener usuario:", e)
@@ -62,8 +62,8 @@ class UsuarioDAO:
             cursor = conn.cursor()
             cursor.execute("""
                 INSERT INTO Usuarios (IdRol, PrimerNombre, SegundoNombre,
-                                      PrimerApellido, SegundoApellido,
-                                      Telefono, Correo, Contraseña)
+                PrimerApellido, SegundoApellido,
+                Telefono, Correo, Contraseña)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             """, (
                 usuario.id_rol,
