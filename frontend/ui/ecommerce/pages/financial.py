@@ -4,6 +4,8 @@ import pandas as pd
 import os
 from backend.logic.financial_models import FinancialAnalyzer
 from backend.logic.excel_handler import ExcelHandler
+from .chatbot import ChatbotWindow
+from ..theme_manager import get_color
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
 
@@ -27,10 +29,12 @@ class FinancialPage(ctk.CTkFrame):
         btn_frame = ctk.CTkFrame(self.header_frame, fg_color="transparent")
         btn_frame.pack(side="right")
         
-        ctk.CTkButton(btn_frame, text="Descargar Plantillas", command=self.download_templates, fg_color="#E5E7EB", text_color="#111827").pack(side="left", padx=6)
-        ctk.CTkButton(btn_frame, text="Importar Año Base", command=lambda: self.import_data('base'), fg_color="#06B6D4").pack(side="left", padx=6)
-        ctk.CTkButton(btn_frame, text="Importar Año Actual", command=lambda: self.import_data('current'), fg_color="#06B6D4").pack(side="left", padx=6)
-        ctk.CTkButton(btn_frame, text="Exportar Reporte", command=self.export_report, fg_color="#10B981").pack(side="left", padx=6)
+        ctk.CTkButton(btn_frame, text="Descargar Plantillas", command=self.download_templates, fg_color=get_color('card_bg'), text_color=get_color('text')).pack(side="left", padx=6)
+        ctk.CTkButton(btn_frame, text="Importar Año Base", command=lambda: self.import_data('base'), fg_color=get_color('primary')).pack(side="left", padx=6)
+        ctk.CTkButton(btn_frame, text="Importar Año Actual", command=lambda: self.import_data('current'), fg_color=get_color('primary')).pack(side="left", padx=6)
+        ctk.CTkButton(btn_frame, text="Exportar Reporte", command=self.export_report, fg_color=get_color('success')).pack(side="left", padx=6)
+        ctk.CTkButton(btn_frame, text="Chatbot", command=self.open_chatbot, fg_color=get_color('accent')).pack(side="left", padx=6)
+        ctk.CTkButton(btn_frame, text="Interpretar", command=self.show_interpretations, fg_color=get_color('accent')).pack(side="left", padx=6)
 
         # --- Pestañas ---
         # Secciones del análisis financiero: Balance, Estado de Resultados, Fuentes/Usos, Razones y Gráficos
@@ -186,6 +190,10 @@ class FinancialPage(ctk.CTkFrame):
 
                 ctk.CTkLabel(sf, text=display, text_color="#374151").grid(row=r+1, column=c, padx=8, pady=4)
 
+    def on_theme_change(self):
+        # Called when palette changes — refresh UI elements if needed
+        self.refresh_ui()
+
     def render_simple_table(self, parent, df):
         if df is None or df.empty: return
         for r, row in df.iterrows():
@@ -275,7 +283,174 @@ class FinancialPage(ctk.CTkFrame):
 
     def export_report(self):
         print("Exporting report...")
-        # Implementation would use pandas to write to Excel
+        # Save comprehensive analysis to exports/latest_financial_report.xlsx
+        out_dir = os.path.join(os.getcwd(), 'exports')
+        os.makedirs(out_dir, exist_ok=True)
+        out_path = os.path.join(out_dir, 'latest_financial_report.xlsx')
+
+        # Prepare proforma pct_map from current entries (if any)
+        pct_map = {}
+        if hasattr(self, 'pct_entries') and isinstance(self.pct_entries, dict):
+            for k, ent in self.pct_entries.items():
+                try:
+                    v = ent.get().strip()
+                    if v != '':
+                        pct_map[k] = float(v)
+                except Exception:
+                    continue
+
+        proforma = self.analyzer.generate_proforma(pct_map) if (self.analyzer.current_bs is not None and self.analyzer.current_is is not None) else None
+
+        with pd.ExcelWriter(out_path, engine='xlsxwriter') as writer:
+            # Raw sheets
+            if self.analyzer.base_bs is not None:
+                self.analyzer.base_bs.to_excel(writer, sheet_name='Balance_Base_Raw', index=False)
+            if self.analyzer.current_bs is not None:
+                self.analyzer.current_bs.to_excel(writer, sheet_name='Balance_Actual_Raw', index=False)
+            if self.analyzer.base_is is not None:
+                self.analyzer.base_is.to_excel(writer, sheet_name='IS_Base_Raw', index=False)
+            if self.analyzer.current_is is not None:
+                self.analyzer.current_is.to_excel(writer, sheet_name='IS_Actual_Raw', index=False)
+
+            # Analyses (vertical/horizontal)
+            v = self.analyzer.analysis_results.get('vertical_bs_base')
+            if v is not None and not v.empty:
+                v.to_excel(writer, sheet_name='Vertical_BS_Base', index=False)
+            v = self.analyzer.analysis_results.get('vertical_bs_actual')
+            if v is not None and not v.empty:
+                v.to_excel(writer, sheet_name='Vertical_BS_Actual', index=False)
+            h = self.analyzer.analysis_results.get('horizontal_bs')
+            if h is not None and not h.empty:
+                h.to_excel(writer, sheet_name='Horizontal_BS', index=False)
+
+            v = self.analyzer.analysis_results.get('vertical_is_base')
+            if v is not None and not v.empty:
+                v.to_excel(writer, sheet_name='Vertical_IS_Base', index=False)
+            v = self.analyzer.analysis_results.get('vertical_is_actual')
+            if v is not None and not v.empty:
+                v.to_excel(writer, sheet_name='Vertical_IS_Actual', index=False)
+            h = self.analyzer.analysis_results.get('horizontal_is')
+            if h is not None and not h.empty:
+                h.to_excel(writer, sheet_name='Horizontal_IS', index=False)
+
+            # Ratios
+            ratios = self.analyzer.analysis_results.get('ratios', []) or []
+            if ratios:
+                try:
+                    df_ratios = pd.DataFrame(ratios)
+                    df_ratios.to_excel(writer, sheet_name='Razones', index=False)
+                except Exception:
+                    # fallback: write as single-column text
+                    pd.DataFrame({'Razones': [str(r) for r in ratios]}).to_excel(writer, sheet_name='Razones', index=False)
+
+            # Fuentes y Usos
+            su = self.analyzer.analysis_results.get('sources_uses', {}) or {}
+            if isinstance(su, dict):
+                if 'Fuentes' in su and su['Fuentes'] is not None and not su['Fuentes'].empty:
+                    su['Fuentes'].to_excel(writer, sheet_name='Fuentes', index=False)
+                if 'Usos' in su and su['Usos'] is not None and not su['Usos'].empty:
+                    su['Usos'].to_excel(writer, sheet_name='Usos', index=False)
+
+            # Proforma (if generated)
+            if proforma:
+                if proforma.get('bs') is not None and not proforma['bs'].empty:
+                    proforma['bs'].to_excel(writer, sheet_name='Proforma_BS', index=False)
+                if proforma.get('is') is not None and not proforma['is'].empty:
+                    proforma['is'].to_excel(writer, sheet_name='Proforma_IS', index=False)
+                if proforma.get('vertical_bs') is not None and not proforma['vertical_bs'].empty:
+                    proforma['vertical_bs'].to_excel(writer, sheet_name='Proforma_Vert_BS', index=False)
+                if proforma.get('vertical_is') is not None and not proforma['vertical_is'].empty:
+                    proforma['vertical_is'].to_excel(writer, sheet_name='Proforma_Vert_IS', index=False)
+
+            # Interpretations / recommendations
+            try:
+                interp_lines = []
+                # reuse show_interpretations logic but without UI
+                ratios_local = self.analyzer.analysis_results.get('ratios', []) or []
+                if not ratios_local:
+                    interp_lines.append('No hay datos suficientes para generar interpretaciones.')
+                else:
+                    liq = next((r for r in ratios_local if 'Liquidez Corriente' in r.get('nombre','')), None)
+                    if liq and liq.get('valor') is not None:
+                        if liq['valor'] < 1:
+                            interp_lines.append('La liquidez corriente es baja (<1): riesgo de falta de recursos para obligaciones de corto plazo.')
+                        elif liq['valor'] < 1.5:
+                            interp_lines.append('La liquidez es moderada; conviene vigilar el capital de trabajo.')
+                        else:
+                            interp_lines.append('La liquidez parece adecuada.')
+
+                    margen = next((r for r in ratios_local if 'Margen de Utilidad Neta' in r.get('nombre','')), None)
+                    if margen and margen.get('valor') is not None:
+                        if margen['valor'] < 0.05:
+                            interp_lines.append('Margen Neto bajo: revisar estructura de costos y precios.')
+                        else:
+                            interp_lines.append('Margen Neto aceptable.')
+
+                    indebt = next((r for r in ratios_local if 'Índice de Endeudamiento' in r.get('nombre','')), None)
+                    if indebt and indebt.get('valor') is not None:
+                        if indebt['valor'] > 0.6:
+                            interp_lines.append('Alto apalancamiento: considerar reducir deuda o aumentar patrimonio.')
+                        else:
+                            interp_lines.append('Nivel de endeudamiento moderado.')
+
+                    interp_lines.append('Recomendaciones generales:')
+                    interp_lines.append('- Mejorar rotación de activos si las ventas son bajas respecto a activos.')
+                    interp_lines.append('- Revisar inventarios y cuentas por cobrar para liberar capital de trabajo.')
+
+                pd.DataFrame({'Interpretaciones': interp_lines}).to_excel(writer, sheet_name='Interpretaciones', index=False)
+            except Exception:
+                pass
+
+        print(f"Reporte guardado en {out_path}")
+
+    def open_chatbot(self):
+        ChatbotWindow(self.master)
+
+    def show_interpretations(self):
+        # Generate simple textual interpretations based on ratios and trends
+        text = []
+        ratios = self.analyzer.analysis_results.get('ratios', []) or []
+        if not ratios:
+            text.append('No hay datos suficientes para generar interpretaciones.')
+        else:
+            # Liquidity
+            liq = next((r for r in ratios if 'Liquidez Corriente' in r.get('nombre','')), None)
+            if liq and liq.get('valor') is not None:
+                if liq['valor'] < 1:
+                    text.append('La liquidez corriente es baja (<1): riesgo de falta de recursos para obligaciones de corto plazo.')
+                elif liq['valor'] < 1.5:
+                    text.append('La liquidez es moderada; conviene vigilar el capital de trabajo.')
+                else:
+                    text.append('La liquidez parece adecuada.')
+
+            # Profitability
+            margen = next((r for r in ratios if 'Margen de Utilidad Neta' in r.get('nombre','')), None)
+            if margen and margen.get('valor') is not None:
+                if margen['valor'] < 0.05:
+                    text.append('Margen Neto bajo: revisar estructura de costos y precios.')
+                else:
+                    text.append('Margen Neto aceptable.')
+
+            # Leverage
+            indebt = next((r for r in ratios if 'Índice de Endeudamiento' in r.get('nombre','')), None)
+            if indebt and indebt.get('valor') is not None:
+                if indebt['valor'] > 0.6:
+                    text.append('Alto apalancamiento: considerar reducir deuda o aumentar patrimonio.')
+                else:
+                    text.append('Nivel de endeudamiento moderado.')
+
+            text.append('\nRecomendaciones generales:')
+            text.append('- Mejorar rotación de activos si las ventas son bajas respecto a activos.')
+            text.append('- Revisar inventarios y cuentas por cobrar para liberar capital de trabajo.')
+
+        # Show in a popup
+        popup = ctk.CTkToplevel(self)
+        popup.geometry('600x400')
+        popup.title('Interpretaciones y Recomendaciones')
+        body = ctk.CTkScrollableFrame(popup)
+        body.pack(fill='both', expand=True, padx=8, pady=8)
+        for p in text:
+            ctk.CTkLabel(body, text=p, wraplength=560, text_color=get_color('text')).pack(anchor='w', pady=6)
 
     def render_proforma(self, parent):
         for w in parent.winfo_children():
