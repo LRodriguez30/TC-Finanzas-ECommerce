@@ -22,7 +22,7 @@ def crear_conexion():
     try:
         conn_str = (
             "Driver={ODBC Driver 18 for SQL Server};"
-            "Server=DESKTOP-B2AK10N;"
+            "Server=RAFAELESPINOZA\\SQLSERVER2019;"
             "Database=ECommerce;"
             "Trusted_Connection=Yes;"  # Autenticación de Windows
             "Encrypt=Yes;"

@@ -8,7 +8,7 @@ class Sidebar(ctk.CTkFrame):
         self.logout_callback = logout_callback
         
         # Configure grid layout
-        self.grid_rowconfigure(6, weight=1) # Spacer
+        self.grid_rowconfigure(7, weight=1) # Spacer
         
         # Header
         self.logo_label = ctk.CTkLabel(self, text="LRR\nEcommerce\nSYSTEM", font=ctk.CTkFont(size=20, weight="bold"), text_color="white")
@@ -18,12 +18,13 @@ class Sidebar(ctk.CTkFrame):
         self.home_button = self.create_nav_button("Inicio", "HOME", 1)
         self.products_button = self.create_nav_button("Productos", "PRODUCTS", 2)
         self.sellers_button = self.create_nav_button("Vendedores", "SELLERS", 3)
-        self.financial_button = self.create_nav_button("Análisis Financiero", "FINANCIAL", 4)
+        self.financial_button = self.create_nav_button("Análisis Financiero de excel", "FINANCIAL", 4)
         self.account_button = self.create_nav_button("Mi Cuenta", "ACCOUNT", 5)
+        self.financialEcommerce_button = self.create_nav_button("Análisis Financiero de Ecommerce", "FINANCIALECOMMERCE", 6)
         
         # Logout Button
         self.logout_button = ctk.CTkButton(self, text="Cerrar Sesión", fg_color="transparent", border_width=1, border_color="white", text_color="white", hover_color="#D97706", anchor="w", command=self._on_logout_pressed)
-        self.logout_button.grid(row=7, column=0, padx=20, pady=20, sticky="ew")
+        self.logout_button.grid(row=8, column=0, padx=20, pady=20, sticky="ew")
         
     def create_nav_button(self, text, view_name, row):
         button = ctk.CTkButton(self, corner_radius=0, height=40, border_spacing=10, text=text,

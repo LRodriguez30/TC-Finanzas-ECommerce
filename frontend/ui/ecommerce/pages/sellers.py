@@ -14,8 +14,8 @@ class SellersPage(ctk.CTkFrame):
         self.header.pack(fill="x", padx=2, pady=2) # Small padding to show border
         
         self.title = ctk.CTkLabel(self.header, text="Registro para Vendedores", 
-                                  font=ctk.CTkFont(family="Serif", size=24, weight="bold", slant="italic"),
-                                  text_color="black")
+                                    font=ctk.CTkFont(family="Serif", size=24, weight="bold", slant="italic"),
+                                    text_color="black")
         self.title.place(relx=0.5, rely=0.5, anchor="center")
         
         # --- Form Content ---
@@ -24,7 +24,7 @@ class SellersPage(ctk.CTkFrame):
         
         # Title "Registro"
         self.lbl_registro = ctk.CTkLabel(self.form_frame, text="Registro", text_color="green", 
-                                         font=ctk.CTkFont(size=16))
+                                        font=ctk.CTkFont(size=16))
         self.lbl_registro.pack(anchor="w")
         
         # Separator line
@@ -73,8 +73,8 @@ class SellersPage(ctk.CTkFrame):
         self.actions_frame.pack(fill="x", pady=20)
         
         self.btn_register = ctk.CTkButton(self.actions_frame, text="Registrarte", fg_color="#D97706", # Darker Orange
-                                          font=ctk.CTkFont(weight="bold", size=16), height=40,
-                                          command=self.register)
+                                            font=ctk.CTkFont(weight="bold", size=16), height=40,
+                                            command=self.register)
         self.btn_register.pack(side="left", expand=True, padx=5)
         
         self.btn_cancel = ctk.CTkButton(self.actions_frame, text="Cancelar", fg_color="#65A30D", # Olive Green

@@ -19,6 +19,15 @@ class ProductsPage(ctk.CTkFrame):
         self.filter_label = ctk.CTkLabel(self.filters_frame, text="Filtros", font=ctk.CTkFont(size=18, weight="bold"))
         self.filter_label.pack(pady=20, padx=10, anchor="w")
         
+        # Label "Buscar" debajo de "Filtros"
+        self.buscar_label = ctk.CTkLabel(
+        self.filters_frame,
+        text="Buscar",
+        font=ctk.CTkFont(size=15, weight="bold"),
+        text_color="#374151"
+        )
+        self.buscar_label.pack(pady=(0, 0), padx=10, anchor="w")
+
         # Búsqueda
         # Campo que filtra los productos en tiempo real según el texto ingresado
         self.search_var = ctk.StringVar()

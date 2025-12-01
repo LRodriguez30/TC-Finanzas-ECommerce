@@ -4,6 +4,94 @@ from config import crear_conexion
 class CuentaDAO:
 
     @staticmethod
+    def obtener_cuentas_balance_plataforma() -> list[Cuenta]:
+        conn = crear_conexion()
+        if conn is None:
+            return []
+        
+        try:
+            cursor = conn.cursor()
+            # Asumimos que 1,2,3,4,5 son cuentas de Balance (Activo, Pasivo, Capital)
+            # Basado en el input del usuario: 1=Efectivo(Activo?), 2=Mobiliario(Activo?), 5=Capital
+            cursor.execute("""
+                SELECT IdCuenta, IdTipoCuenta, IdVendedor, EsCuentaPlataforma,
+                        NombreCuenta, CodigoCuenta, EsAfectable,
+                        EsCuentaDeSistema, Descripcion, SaldoActual
+                FROM Cuentas
+                WHERE EsCuentaPlataforma = 1 AND IdTipoCuenta IN (1, 2, 3, 4, 5)
+            """)
+
+            rows = cursor.fetchall()
+            cuentas = []
+
+            for row in rows:
+                cuentas.append(
+                    Cuenta(
+                        id=row[0],
+                        id_tipo_cuenta=row[1],
+                        id_vendedor=row[2],
+                        es_cuenta_plataforma=row[3],
+                        nombre_cuenta=row[4],
+                        codigo_cuenta=row[5],
+                        es_afectable=row[6],
+                        es_cuenta_de_sistema=row[7],
+                        descripcion=row[8],
+                        saldo_actual=row[9]
+                    )
+                )
+
+            return cuentas
+
+        except Exception as e:
+            print("Error al obtener las cuentas de balance de plataforma:", e)
+            return []
+        finally:
+            conn.close()
+
+    @staticmethod
+    def obtener_cuentas_resultados_plataforma() -> list[Cuenta]:
+        conn = crear_conexion()
+        if conn is None:
+            return []
+        
+        try:
+            cursor = conn.cursor()
+            cursor.execute("""
+                SELECT IdCuenta, IdTipoCuenta, IdVendedor, EsCuentaPlataforma,
+                        NombreCuenta, CodigoCuenta, EsAfectable,
+                        EsCuentaDeSistema, Descripcion, SaldoActual
+                FROM Cuentas
+                WHERE EsCuentaPlataforma = 1 AND IdTipoCuenta IN (6, 7)
+            """)
+
+            rows = cursor.fetchall()
+            cuentas = []
+
+            for row in rows:
+                cuentas.append(
+                    Cuenta(
+                        id=row[0],
+                        id_tipo_cuenta=row[1],
+                        id_vendedor=row[2],
+                        es_cuenta_plataforma=row[3],
+                        nombre_cuenta=row[4],
+                        codigo_cuenta=row[5],
+                        es_afectable=row[6],
+                        es_cuenta_de_sistema=row[7],
+                        descripcion=row[8],
+                        saldo_actual=row[9]
+                    )
+                )
+
+            return cuentas
+
+        except Exception as e:
+            print("Error al obtener las cuentas de resultados de plataforma:", e)
+            return []
+        finally:
+            conn.close()
+
+    @staticmethod
     def obtener_por_id_vendedor(id_vendedor: int) -> list[Cuenta]:
         conn = crear_conexion()
         if conn is None:
