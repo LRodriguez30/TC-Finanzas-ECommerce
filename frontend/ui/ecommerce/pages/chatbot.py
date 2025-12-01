@@ -9,7 +9,7 @@ import threading
 # Para pruebas locales puedes pegar aquí tu API Key temporalmente.
 # ADVERTENCIA: guardar claves en el código fuente es inseguro. Reemplaza
 # el valor por tu API Key solo para pruebas y luego usa variables de entorno.
-API_KEY = 'AIzaSyCqPH96SHeLx9GpChQ37SASfQP42yJAVKI'  # <-- Pega tu API Key aquí manualmente para probar localmente
+API_KEY = 'AIzaSyAVN2fESdk2c786ct0YfouJsCKEd9yCE_M'  # <-- Pega tu API Key aquí manualmente para probar localmente
 
 
 class ChatbotWindow(ctk.CTkToplevel):
