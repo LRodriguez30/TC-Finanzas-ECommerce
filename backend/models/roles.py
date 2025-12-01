@@ -1,5 +1,5 @@
 class Rol:
-    def __unit__(
+    def __init__(
         self,
         id=None,
         nombre_rol=None,

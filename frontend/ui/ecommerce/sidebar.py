@@ -1,11 +1,12 @@
 import customtkinter as ctk
 
 class Sidebar(ctk.CTkFrame):
-    def __init__(self, master, navigate_callback, logout_callback=None):
+    def __init__(self, master, navigate_callback, logout_callback=None, user_role=0):
         # Por defecto usa una paleta verde oliva; puede actualizarse mediante `apply_palette`
         super().__init__(master, width=250, corner_radius=0, fg_color="#65A30D") # Olive Green
         self.navigate_callback = navigate_callback
         self.logout_callback = logout_callback
+        self.user_role = user_role
         
         # Configure grid layout
         self.grid_rowconfigure(7, weight=1) # Spacer
@@ -17,10 +18,16 @@ class Sidebar(ctk.CTkFrame):
         # Navigation Buttons
         self.home_button = self.create_nav_button("Inicio", "HOME", 1)
         self.products_button = self.create_nav_button("Productos", "PRODUCTS", 2)
-        self.sellers_button = self.create_nav_button("Vendedores", "SELLERS", 3)
-        self.financial_button = self.create_nav_button("Análisis Financiero de excel", "FINANCIAL", 4)
-        self.account_button = self.create_nav_button("Mi Cuenta", "ACCOUNT", 5)
-        self.financialEcommerce_button = self.create_nav_button("Análisis Financiero de Ecommerce", "FINANCIALECOMMERCE", 6)
+        self.financial_button = self.create_nav_button("Análisis Financiero de excel", "FINANCIAL", 3)
+        self.account_button = self.create_nav_button("Mi Cuenta", "ACCOUNT", 4)
+        
+        # Role-based buttons
+        # 1: Administrador -> Ve "Análisis Financiero de Ecommerce"
+        # 2: Vendedor -> Ve "Finanzas Vendedor"
+        if self.user_role == 1:
+            self.financialEcommerce_button = self.create_nav_button("Análisis Financiero de Ecommerce", "FINANCIALECOMMERCE", 5)
+        elif self.user_role == 2:
+            self.financialVendedor_button = self.create_nav_button("Finanzas Vendedor", "FINANCIALVENDEDOR", 5)
         
         # Logout Button
         self.logout_button = ctk.CTkButton(self, text="Cerrar Sesión", fg_color="transparent", border_width=1, border_color="white", text_color="white", hover_color="#D97706", anchor="w", command=self._on_logout_pressed)
@@ -46,7 +53,13 @@ class Sidebar(ctk.CTkFrame):
             self.configure(fg_color=sidebar_bg)
 
             # Actualizar botones de navegación
-            for btn in [self.home_button, self.products_button, self.sellers_button, self.financial_button, self.account_button]:
+            buttons_to_update = [self.home_button, self.products_button, self.financial_button, self.account_button]
+            if hasattr(self, 'financialEcommerce_button'):
+                buttons_to_update.append(self.financialEcommerce_button)
+            if hasattr(self, 'financialVendedor_button'):
+                buttons_to_update.append(self.financialVendedor_button)
+
+            for btn in buttons_to_update:
                 try:
                     btn.configure(hover_color=hover)
                 except Exception:

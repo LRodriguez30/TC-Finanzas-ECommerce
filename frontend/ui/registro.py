@@ -56,8 +56,10 @@ def mostrar_registro(ventana_principal: ctk.CTk) -> None:
     # Selección de rol
     combo_rol: ctk.CTkComboBox = ctk.CTkComboBox(
         marco_formulario,
-        values=["Administrador", "Vendedor", "Comprador"]
+        values=["Administrador", "Vendedor", "Comprador"],
+        state="readonly"
     )
+    combo_rol.set("Administrador")  # Valor por defecto
     combo_rol.pack(pady=5, padx=20, fill="x")
 
     # Entradas de texto
@@ -101,7 +103,8 @@ def mostrar_registro(ventana_principal: ctk.CTk) -> None:
             },
             etiqueta_mensaje,
             ventana_principal,
-            marco_principal
+            marco_principal,
+            marco_loading=marco_derecho
         )
     )
 

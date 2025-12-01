@@ -20,7 +20,7 @@ class AdministradorDAO:
                 SELECT IdAdministrador, IdUsuario
                 FROM Administradores
                 WHERE IdUsuario = ?
-            """, (id_usuario))
+            """, (id_usuario,))
             
             row = cursor.fetchone()
             if not row:
@@ -32,7 +32,7 @@ class AdministradorDAO:
                 id_usuario=row[1]           # IdUsuario
             )
         except Exception as e:
-            print("Error al obtener el comprador:", e)
+            print("Error al obtener el administrador:", e)
             return None
         finally:
             conn.close()
@@ -54,7 +54,7 @@ class AdministradorDAO:
                 INSERT INTO Administradores (IdUsuario)
                 VALUES (?)
             """, (
-                id_usuario
+                id_usuario,
             ))
             conn.commit()
             return True

@@ -1,14 +1,14 @@
 MOCK_PRODUCTS = [
-    {"id": 1, "name": "Laptop Gamer HP Victus", "price": 1200, "category": "Electrónica"},
-    {"id": 2, "name": "iPhone 14 Pro", "price": 1100, "category": "Electrónica"},
-    {"id": 3, "name": "Samsung Galaxy S23", "price": 950, "category": "Electrónica"},
-    {"id": 4, "name": "Monitor LG UltraGear", "price": 350, "category": "Electrónica"},
-    {"id": 5, "name": "Teclado Mecánico Keychron", "price": 120, "category": "Accesorios"},
-    {"id": 6, "name": "Mouse Logitech MX Master 3", "price": 100, "category": "Accesorios"},
-    {"id": 7, "name": "Silla Ergonómica Herman Miller", "price": 1400, "category": "Muebles"},
-    {"id": 8, "name": "Escritorio Elevable", "price": 450, "category": "Muebles"},
-    {"id": 9, "name": "Auriculares Sony WH-1000XM5", "price": 350, "category": "Audio"},
-    {"id": 10, "name": "iPad Air 5", "price": 600, "category": "Electrónica"},
+    {"id": 1, "name": "Laptop Gamer HP Victus", "price": 1200, "category": "Electrónica", "image_file": "hp_victus.avif"},
+    {"id": 2, "name": "iPhone 14 Pro", "price": 1100, "category": "Electrónica", "image_file": "iphone_14_pro.jpg"},
+    {"id": 3, "name": "Samsung Galaxy S23", "price": 950, "category": "Electrónica", "image_file": "galaxy_s23.jpg"},
+    {"id": 4, "name": "Monitor LG UltraGear", "price": 350, "category": "Electrónica", "image_file": "lg_ultragear.jpg"},
+    {"id": 5, "name": "Teclado Mecánico Keychron", "price": 120, "category": "Accesorios", "image_file": "keychron.webp"},
+    {"id": 6, "name": "Mouse Logitech MX Master 3", "price": 100, "category": "Accesorios", "image_file": "mx_master_3.webp"},
+    {"id": 7, "name": "Silla Ergonómica Herman Miller", "price": 1400, "category": "Muebles", "image_file": "herman_miller.jpg"},
+    {"id": 8, "name": "Escritorio Elevable", "price": 450, "category": "Muebles", "image_file": "escritorio_elevable.webp"},
+    {"id": 9, "name": "Auriculares Sony WH-1000XM5", "price": 350, "category": "Audio", "image_file": "sony_xm5.webp"},
+    {"id": 10, "name": "iPad Air 5", "price": 600, "category": "Electrónica", "image_file": "ipad_air.webp"},
 ]
 
 RATIO_DATA = [

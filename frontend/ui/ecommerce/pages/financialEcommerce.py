@@ -39,13 +39,14 @@ class FinancialEcommercePage(ctk.CTkFrame):
             "Proforma": self.tabview.add("Proforma")
         }
         
+        
         # Estado inicial vacío para pestañas no implementadas
         for tab_name, tab in self.tabs.items():
             if tab_name in ["Resultados", "Balance", "Origen", "Razones", "Flujos", "Graficos", "Proforma"]:
                 continue
-            ctk.CTkLabel(tab, text=f"Contenido de {tab_name} en construcción", text_color="#374151").pack(pady=20)
 
         # Cargar datos
+        self.load_platform_accounts()
         self.load_income_statement()
         self.load_balance_sheet()
         self.load_cash_flow()
@@ -53,6 +54,113 @@ class FinancialEcommercePage(ctk.CTkFrame):
         self.load_cash_flow_statements()
         self.load_charts()
         self.render_proforma(self.tabs["Proforma"])
+    
+    def load_platform_accounts(self):
+        """Carga las cuentas de la plataforma en la pestaña de Cuentas"""
+        cuentas_tab = self.tabs["Cuentas"]
+        
+        # Limpiar la pestaña
+        for widget in cuentas_tab.winfo_children():
+            widget.destroy()
+        
+        # Header con título
+        header_frame = ctk.CTkFrame(cuentas_tab, fg_color="transparent")
+        header_frame.pack(fill="x", padx=20, pady=(20, 10))
+        
+        ctk.CTkLabel(
+            header_frame,
+            text="Cuentas de la Plataforma",
+            font=ctk.CTkFont(size=18, weight="bold"),
+            text_color="#111827"
+        ).pack(side="left")
+        
+        # Obtener todas las cuentas de la plataforma
+        all_balance = CuentaDAO.obtener_cuentas_balance_plataforma()
+        all_results = CuentaDAO.obtener_cuentas_resultados_plataforma()
+        all_platform_accounts = all_balance + all_results
+        
+        if not all_platform_accounts:
+            ctk.CTkLabel(
+                cuentas_tab,
+                text="No se encontraron cuentas de la plataforma",
+                text_color="#6B7280"
+            ).pack(pady=20)
+            return
+        
+        # Crear tabla de cuentas
+        table_frame = ctk.CTkScrollableFrame(cuentas_tab, fg_color="transparent")
+        table_frame.pack(fill="both", expand=True, padx=20, pady=10)
+        
+        # Headers
+        headers = ["Código", "Nombre", "Tipo", "Saldo", "Sistema"]
+        header_frame = ctk.CTkFrame(table_frame, fg_color="#F3F4F6")
+        header_frame.pack(fill="x", pady=(0, 5))
+        
+        for i, header in enumerate(headers):
+            ctk.CTkLabel(
+                header_frame,
+                text=header,
+                font=ctk.CTkFont(size=12, weight="bold"),
+                text_color="#374151",
+                width=150 if i < 4 else 80
+            ).grid(row=0, column=i, padx=10, pady=8, sticky="w")
+        
+        # Datos de cuentas
+        tipos_cuenta = {
+            1: "Activo Corriente",
+            2: "Activo No Corriente",
+            3: "Pasivo Corriente",
+            4: "Pasivo No Corriente",
+            5: "Capital",
+            6: "Ingreso",
+            7: "Gasto Operativo",
+            8: "Gasto de Interés"
+        }
+        
+        for cuenta in all_platform_accounts:
+            row_frame = ctk.CTkFrame(table_frame, fg_color="transparent")
+            row_frame.pack(fill="x", pady=2)
+            
+            # Código
+            ctk.CTkLabel(
+                row_frame,
+                text=cuenta.codigo_cuenta,
+                text_color="#111827",
+                width=150
+            ).grid(row=0, column=0, padx=10, pady=5, sticky="w")
+            
+            # Nombre
+            ctk.CTkLabel(
+                row_frame,
+                text=cuenta.nombre_cuenta,
+                text_color="#111827",
+                width=150
+            ).grid(row=0, column=1, padx=10, pady=5, sticky="w")
+            
+            # Tipo
+            ctk.CTkLabel(
+                row_frame,
+                text=tipos_cuenta.get(cuenta.id_tipo_cuenta, "Desconocido"),
+                text_color="#6B7280",
+                width=150
+            ).grid(row=0, column=2, padx=10, pady=5, sticky="w")
+            
+            # Saldo
+            ctk.CTkLabel(
+                row_frame,
+                text=f"${cuenta.saldo_actual:,.2f}",
+                text_color="#059669" if cuenta.saldo_actual >= 0 else "#EF4444",
+                width=150
+            ).grid(row=0, column=3, padx=10, pady=5, sticky="w")
+            
+            # Sistema
+            sistema_text = "✓" if cuenta.es_cuenta_de_sistema else ""
+            ctk.CTkLabel(
+                row_frame,
+                text=sistema_text,
+                text_color="#F97316",
+                width=80
+            ).grid(row=0, column=4, padx=10, pady=5, sticky="w")
 
     def load_balance_sheet(self):
         # 1. Datos del Período Anterior (Hardcoded)

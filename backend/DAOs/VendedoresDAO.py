@@ -38,7 +38,11 @@ class VendedorDAO:
             conn.close()
 
     @staticmethod
-    def insertar_vendedor(vendedor: Vendedor) -> bool:
+    def insertar_vendedor(id_usuario: int) -> bool:
+        """
+        Inserta un vendedor en la base de datos con valores por defecto.
+        Retorna True si se insertó correctamente, False en caso contrario.
+        """
         conn = crear_conexion()
         if conn is None:
             print("No hay conexión con SQL Server.")
@@ -51,11 +55,11 @@ class VendedorDAO:
                                         DescripcionNegocio, EsContribuyente)
                 VALUES (?, ?, ?, ?, ?)
             """, (
-                vendedor.id_usuario,
-                vendedor.nombre_negocio,
-                vendedor.logo_negocio,
-                vendedor.descripcion_negocio,
-                vendedor.es_contribuyente
+                id_usuario,
+                None,  # nombre_negocio
+                None,  # logo_negocio
+                None,  # descripcion_negocio
+                0      # es_contribuyente (por defecto no cobra IVA)
             ))
             conn.commit()
             return True

@@ -6,6 +6,7 @@ from .pages.financial import FinancialPage
 from .pages.account import AccountPage
 from .pages.sellers import SellersPage
 from .pages.financialEcommerce import FinancialEcommercePage
+from .pages.financialVendedor import FinancialVendedorPage
 from frontend.components.navigation import cerrar_sesion
 
 class EcommerceApp(ctk.CTkFrame):
@@ -21,7 +22,8 @@ class EcommerceApp(ctk.CTkFrame):
         
         # Barra lateral (navegación)
         # Contiene los elementos de navegación que permiten cambiar entre vistas/páginas
-        self.sidebar = Sidebar(self, self.navigate, logout_callback=self.logout_event)
+        user_role = self.usuario.id_rol if self.usuario else 0
+        self.sidebar = Sidebar(self, self.navigate, logout_callback=self.logout_event, user_role=user_role)
         self.sidebar.grid(row=0, column=0, sticky="nsew")
         
         # Área principal de contenido
@@ -41,6 +43,7 @@ class EcommerceApp(ctk.CTkFrame):
         self.pages["SELLERS"] = SellersPage(self.main_frame)
         self.pages["ACCOUNT"] = AccountPage(self.main_frame, app_reference=self)
         self.pages["FINANCIALECOMMERCE"] = FinancialEcommercePage(self.main_frame)
+        self.pages["FINANCIALVENDEDOR"] = FinancialVendedorPage(self.main_frame, usuario=self.usuario)
 
         # Paleta por defecto (puede ser cambiada desde la página 'Mi Cuenta')
         self.current_palette = {'sidebar_bg': '#65A30D', 'accent': '#65A30D', 'hover': '#F97316'}
